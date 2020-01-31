@@ -1,7 +1,8 @@
 import sys
 import os
 import ArgParser as ap
-import ErrorHandling as err
+from ErrorHandling import ErrorHandler as err
+
 
 class Automator:
     FILE_NAME = os.path.basename(sys.argv[0])
@@ -15,20 +16,22 @@ class Automator:
     def __init__(self):
         # Create the arg parser object with the sys.args list of arguments.  This will be used by each tool
         # module to generate the options and data it will need.
+        err.set_usage_message(self.USAGE)
         self.arg_parser = ap.Parser(sys.argv)
-        self.tool_name = self.arg_parser.get_function_name()
+        self.tool_name = self.arg_parser.get_value("tool")
         return
 
     def run(self):
         # ADDTOOL: This is where you will add your tool creation and call for a new tool.
         #   Follow the "Sample" example (used for unit test of framework).  Import the module file,
         #   create the tool object and pass it the arg_parser, then run the tool.
-        if self.tool_name == "Sample":
+        #   NOTE: All names and values are stored lower case.  Be sure to do comparisons with lower case.
+        if self.tool_name == "sample":
             import SampleTool as st
             tool_object = st.Sample_Tool(self.arg_parser)
             tool_object.run()
         else:
-            err.error_continue(f"'{self.tool_name}' invalid tool")
+            err.error_abort(f"ERROR: '{self.tool_name}' invalid tool", True)
 
         return
 
