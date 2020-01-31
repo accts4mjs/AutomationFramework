@@ -28,7 +28,7 @@ class Automator:
         #   NOTE: All names and values are stored lower case.  Be sure to do comparisons with lower case.
         if self.tool_name == "sample":
             import SampleTool as st
-            tool_object = st.Sample_Tool(self.arg_parser)
+            tool_object = st.SampleTool(self.arg_parser)
             tool_object.run()
         else:
             err.error_abort(f"ERROR: '{self.tool_name}' invalid tool", True)

@@ -24,6 +24,7 @@ class Parser:
                         # Capture arg name and arg value (arg values do not start with '-')
                         self.arg_pairs[arg_list[index][1:].lower()] = arg_list[index+1].lower()
                         index += 1  # Skip the arg value in the iteration of arg names and arg values
+                    index += 1
                 else:
                     # Reaching this condition means either the list started with an arg value or the list
                     # had two arg values in a row.  Both conditions are incorrect.
