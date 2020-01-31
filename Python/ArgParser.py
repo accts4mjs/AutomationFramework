@@ -20,7 +20,7 @@ class Parser:
                 # NOTE:  All arg names and arg values will be stored as lower case to make them case independent
                 if arg_list[index][0] == "-":
                     self.arg_names.append(arg_list[index][1:].lower())  # Strip the '-' from the arg name
-                    if index+1 < num_args and [index+1][0] != "-":
+                    if index+1 < num_args and arg_list[index+1][0] != "-":
                         # Capture arg name and arg value (arg values do not start with '-')
                         self.arg_pairs[arg_list[index][1:].lower()] = arg_list[index+1].lower()
                         index += 1  # Skip the arg value in the iteration of arg names and arg values
@@ -28,8 +28,8 @@ class Parser:
                 else:
                     # Reaching this condition means either the list started with an arg value or the list
                     # had two arg values in a row.  Both conditions are incorrect.
-                    err.error_abort(f"ERROR: Arg value #{index+1} not preceded by arg name.\n{script_name}"
-                                    f" {arg_string}", True)
+                    err.error_abort(f"ERROR: Arg value #{index+1} '{arg_list[index]}' not preceded by arg name.",
+                                    True)
         except IndexError:
             err.error_abort(f"ERROR: Incorrect argument list.\n{script_name} {arg_string}", True)
 
@@ -43,9 +43,9 @@ class Parser:
 
     def check_names_values_optionals(self, name_list, value_name_list, optional_name_list):
         for name in name_list:
-            err.assert_abort(name in self.arg_names, f"ERROR: {name} is a required argument", True)
+            err.assert_abort(name in self.arg_names, f"ERROR: '{name}' is a required argument", True)
         for name in value_name_list:
-            err.assert_abort(name in self.arg_pairs, f"ERROR: {name} requires a value", True)
+            err.assert_abort(name in self.arg_pairs, f"ERROR: '{name}' requires a value", True)
         # Optional name list is a bit trickier.  Need to remove all required names first then compare
         # each optional name to the optional list.  I.e. are the non-required names in the list 'allowed'
         # by the optional list?
@@ -54,4 +54,4 @@ class Parser:
             if name not in name_list:
                 remaining_names.append(name)
         for name in remaining_names:
-            err.assert_abort(name in optional_name_list, f"ERROR: {name} is not a valid argument")
+            err.assert_abort(name in optional_name_list, f"ERROR: '{name}' is not a valid argument", True)
