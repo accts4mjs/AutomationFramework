@@ -41,8 +41,17 @@ class Parser:
         else:
             return ""
 
-    def check_names(self, name_list, optional_name_list):
-        return True
-
-    def check_required_values_by_name(self, name_list):
-        return True
+    def check_names_values_optionals(self, name_list, value_name_list, optional_name_list):
+        for name in name_list:
+            err.assert_abort(name in self.arg_names, f"ERROR: {name} is a required argument", True)
+        for name in value_name_list:
+            err.assert_abort(name in self.arg_pairs, f"ERROR: {name} requires a value", True)
+        # Optional name list is a bit trickier.  Need to remove all required names first then compare
+        # each optional name to the optional list.  I.e. are the non-required names in the list 'allowed'
+        # by the optional list?
+        remaining_names = []
+        for name in self.arg_names:
+            if name not in name_list:
+                remaining_names.append(name)
+        for name in remaining_names:
+            err.assert_abort(name in optional_name_list, f"ERROR: {name} is not a valid argument")
