@@ -47,6 +47,13 @@ expected = "ERROR: Arg value #7 'bar' not preceded by arg name.\n" \
             "-start <start_date> -end <end_date>"
 result = my_call_python(f"{FILE_NAME} -tool sample -basedir . -filename foo bar -version 10 -start 0 -end 1 -v")
 my_tdd(result, expected, test)
+test = "CHECK USAGE - optional arg with missing required value"
+expected = "ERROR: 'foo' requires a value\n" \
+            "usage: Automator.py -tool <tool_name> [-parm1 [<parm1_value>] .. -parmN [<parmN_value>]]\n" \
+            "Examples:\n\tAutomator.py -tool Sample -basedir <path> -filename <name> -version <file_version> " \
+            "-start <start_date> -end <end_date>"
+result = my_call_python(f"{FILE_NAME} -tool sample -basedir . -filename bar -version 10 -start 0 -end 1 -foo")
+my_tdd(result, expected, test)
 
 
 # Check sample tool

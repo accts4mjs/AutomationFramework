@@ -41,7 +41,7 @@ class Parser:
         else:
             return ""
 
-    def check_names_values_optionals(self, name_list, value_name_list, optional_name_list):
+    def check(self, name_list, value_name_list, optional_name_list, optional_value_list):
         for name in name_list:
             err.assert_abort(name in self.arg_names, f"ERROR: '{name}' is a required argument", True)
         for name in value_name_list:
@@ -55,3 +55,6 @@ class Parser:
                 remaining_names.append(name)
         for name in remaining_names:
             err.assert_abort(name in optional_name_list, f"ERROR: '{name}' is not a valid argument", True)
+            # Is a valid optional arg.  If also in optional_value_list then it must have a value
+            if name in optional_value_list:
+                err.assert_abort(name in self.arg_pairs, f"ERROR: '{name}' requires a value", True)
