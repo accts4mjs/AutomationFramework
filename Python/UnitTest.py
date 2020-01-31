@@ -15,6 +15,6 @@ my_tdd(result, expected, test)
 
 # Check sample tool
 test = "SAMPLE TOOL"
-expected = "Hello World!"
+expected = "Hello World!\nbasedir = .\nfilename = foo\nversion = 10\nstart = 20200130\nend = 20200131"
 result = my_call_python(f"{FILE_NAME} -tool Sample -basedir . -filename foo -version 10 -start 20200130 -end 20200131")
 my_tdd(result, expected, test)

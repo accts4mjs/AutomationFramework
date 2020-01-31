@@ -40,3 +40,9 @@ class Parser:
             return self.arg_pairs[lower_name]
         else:
             return ""
+
+    def check_names(self, name_list, optional_name_list):
+        return True
+
+    def check_required_values_by_name(self, name_list):
+        return True
