@@ -23,6 +23,14 @@ class SampleTool:
         self.version = my_args.get_value('version')
         self.start = my_args.get_value('start')
         self.end = my_args.get_value('end')
+        if my_args.optional_arg_set('r'):
+            self.remove = True
+        else:
+            self.remove = False
+        if my_args.optional_arg_set('foo'):
+            self.foo = my_args.get_value('foo')
+        else:
+            self.foo = None
         return
 
     def run(self):
@@ -32,3 +40,5 @@ class SampleTool:
         print(f"version = {self.version}")
         print(f"start = {self.start}")
         print(f"end = {self.end}")
+        print(f"remove = {self.remove}")
+        print(f"foo = {self.foo}")

@@ -42,6 +42,13 @@ class Parser:
             return ""
 
     def check(self, name_list, value_name_list, optional_name_list, optional_value_list):
+        # Make all names lower case (do not change values)
+        for local_list in (name_list, value_name_list, optional_name_list, optional_value_list):
+            index = 0
+            while index < len(local_list):
+                local_list[index] = local_list[index].lower()
+                index += 1
+
         for name in name_list:
             err.assert_abort(name in self.arg_names, f"ERROR: '{name}' is a required argument", True)
         for name in value_name_list:
@@ -58,3 +65,6 @@ class Parser:
             # Is a valid optional arg.  If also in optional_value_list then it must have a value
             if name in optional_value_list:
                 err.assert_abort(name in self.arg_pairs, f"ERROR: '{name}' requires a value", True)
+
+    def optional_arg_set(self, optional_arg):
+        return optional_arg.lower() in self.arg_names
