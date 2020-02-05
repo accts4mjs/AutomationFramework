@@ -1,5 +1,6 @@
 class ErrorHandler:
     usage_message = ""
+    script_call_string = ""
 
     def __init__(self, usage):
         ErrorHandler.usage_message = usage
@@ -7,6 +8,14 @@ class ErrorHandler:
     @classmethod
     def set_usage_message(cls, usage):
         cls.usage_message = usage
+
+    @classmethod
+    def set_script_call_string(cls, call_string):
+        cls.script_call_string = call_string
+
+    @classmethod
+    def get_script_call_string(cls):
+        return cls.script_call_string
 
     @classmethod
     def error_continue(cls, message, usage=False):
