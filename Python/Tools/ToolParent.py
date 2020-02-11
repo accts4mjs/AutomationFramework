@@ -73,5 +73,19 @@ class ToolParent(ABC):
     def optional_arg_set(self, optional_arg):
         return optional_arg.lower() in self.arg_names
 
-    def set_err_usage(self, required_arg_names, required_arg_values, optional_arg_names, optional_arg_values):
-        pass
+    @staticmethod
+    def set_err_usage(class_name, required_arg_names, required_arg_values, optional_arg_names, optional_arg_values):
+        usage_msg = f"-tool {class_name} "
+        for arg in required_arg_names:
+            if arg in required_arg_values:
+                usage_msg += f"-{arg} <value> "
+            else:
+                usage_msg += f"-{arg} "
+
+        for optional_arg in optional_arg_names:
+            if optional_arg in optional_arg_values:
+                usage_msg += f"[-{optional_arg} <value>] "
+            else:
+                usage_msg += f"[-{optional_arg}] "
+
+        err.set_usage_message(usage_msg.rstrip())
