@@ -40,7 +40,7 @@ class Automator:
             else:
                 err.error_abort(f"ERROR: Tool name has '-' in it '{self.arg_list[1]}'", True)
         else:
-            err.error_abort(f"ERROR: Incorrect syntax: '{err.get_call_script_string()}'", True)
+            err.error_abort(f"ERROR: Incorrect syntax: '{err.get_script_call_string()}'", True)
 
     @staticmethod
     def get_tool_list_from_tools_dir():
