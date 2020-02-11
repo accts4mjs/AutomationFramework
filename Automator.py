@@ -45,7 +45,7 @@ class Automator:
     @staticmethod
     def get_tool_list_from_tools_dir():
         # All tools should be stored in the 'Tools' dir that is a child of the current dir
-        base_path = "./Tools"
+        base_path = "Tools"
         tool_list = []
         with os.scandir(base_path) as entries:
             for entry in entries:
