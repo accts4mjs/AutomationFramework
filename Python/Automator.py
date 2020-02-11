@@ -1,5 +1,6 @@
 import sys
 import os
+import importlib
 from ErrorHandling import ErrorHandler as err
 
 
@@ -7,9 +8,10 @@ class Automator:
     FILE_NAME = os.path.basename(sys.argv[0])
     USAGE = f"usage: {FILE_NAME} -tool <tool_name> [-parm1 [<parm1_value>] .. -parmN " \
             "[<parmN_value>]]\nNOTE: Argument values are not required.  I.e. Argument names can be used without a " \
-            " value.  If using a value it must immediately follow the argument name and not start with '-'\n" \
+            " value.\n\tIf using a value it must immediately follow the argument name and not start with '-'\n" \
             "Examples:\n" \
-            f"\t{FILE_NAME} -tool SampleTool -basedir <path> -filename <name> -remove"
+            f"\t{FILE_NAME} -tool SampleTool -basedir <path> -filename <name> -version <file_version> -start " \
+            "<start_date> -end <end_date>"
 
     def __init__(self):
         # Identify the full list of tools available (each tool will be in the tool dir of the <tool_name>.py format).
@@ -23,15 +25,15 @@ class Automator:
 
     def get_tool_name(self):
         num_args = len(self.arg_list)
-        if num_args < 2:
-            err.error_abort(f"ERROR: minimum # of args is 2, got '{num_args}'", True)
+        err.assert_abort(num_args >= 2, f"ERROR: minimum # of args is 2, got '{num_args}'", True)
 
         if self.arg_list[0] == "-tool":
+            # Check next arg and see if it is a value or another arg name
             if self.arg_list[1][0] != '-':  # A '-' would indicate another argument name, not a value
                 name = self.arg_list[1]
                 # Remove the tool flag and value from the arg_list (tool creation won't need it)
                 self.arg_list.pop(0)
-                self.arg_list.pop(1)
+                self.arg_list.pop(0)  # 0 again because you just popped the previous 0 item.
                 return name
             else:
                 err.error_abort(f"ERROR: Tool name has '-' in it '{self.arg_list[1]}'", True)
@@ -46,7 +48,7 @@ class Automator:
         with os.scandir(base_path) as entries:
             for entry in entries:
                 # Only store files that end in .py
-                if entry.is_file() and entry.name.endswith(".py"):
+                if entry.is_file() and entry.name.endswith(".py") and entry.name != "ToolParent.py":
                     tool_list.append(entry.name[:-3])  # Remove the '.py' from the end of the string
         return tool_list
 
@@ -55,11 +57,10 @@ class Automator:
         # Load the tool's module, get its class (same name as tool name), instantiate the class, initialize it, and
         # run it.
         if self.tool_name in self.tool_list:
-            module = __import__(f"Tools.{self.tool_name}")
+            module = importlib.import_module(f"Tools.{self.tool_name}")
             tool_class = getattr(module, self.tool_name)
             tool_object = tool_class(f"{self.FILE_NAME} -tool {self.tool_name} {' '.join(self.arg_list)}",
                                      self.arg_list)
-            tool_object.initialize()
             tool_object.run()
         else:
             err.error_abort(f"ERROR: '{self.tool_name}' invalid tool", True)

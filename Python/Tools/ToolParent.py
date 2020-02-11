@@ -22,8 +22,9 @@ class ToolParent(ABC):
 
                     # If there are more args, do a quick look ahead to see if next item is another arg name (will start
                     # with '-') or if it's an arg value (no '-').  Store arg value and arg name in arg_pairs.
-                    if index+1 < num_args and arg_list[index+1][0] != "-":
-                        self.arg_pairs[arg_name_without_dash] = arg_list[index+1].lower()
+                    next_arg_index = index + 1
+                    if next_arg_index < num_args and arg_list[next_arg_index][0] != "-":
+                        self.arg_pairs[arg_name_without_dash] = arg_list[next_arg_index].lower()
                         index += 1  # Skip the arg value in the iteration of arg names and arg values
                     index += 1  # Move to the next arg name
                 else:
@@ -35,13 +36,13 @@ class ToolParent(ABC):
         except IndexError:
             err.error_abort(f"ERROR: Incorrect argument list.\n{err.get_call_script_string()}", True)
 
-    def get_value_if_present(self, arg_name):
+    def get_value(self, arg_name):
         # Although caller should use lower case, go ahead and force it lower to be case independent
         lower_name = arg_name.lower()
         if lower_name in self.arg_pairs:
             return self.arg_pairs[lower_name]
         else:
-            return None  # Indicates there was no value present (different than an empty string)
+            raise Exception(f"ERROR: '{arg_name}' does not have a value pair")
 
     @abstractmethod
     def validate_arguments(self, name_list, value_name_list, optional_name_list, optional_value_list):
@@ -71,3 +72,6 @@ class ToolParent(ABC):
 
     def optional_arg_set(self, optional_arg):
         return optional_arg.lower() in self.arg_names
+
+    def set_err_usage(self, required_arg_names, required_arg_values, optional_arg_names, optional_arg_values):
+        pass
