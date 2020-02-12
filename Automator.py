@@ -13,9 +13,6 @@ class Automator:
     DEFAULT_USAGE = f"-tool <tool_name> [-parm1 [<parm1_value>] .. -parmN [<parmN_value>]]"
 
     def __init__(self):
-        # Identify the full list of tools available (each tool will be in the tool dir of the <tool_name>.py format).
-        # Then scan the argument list looking for the tool name and if it matches one of the tools, load it, initialize
-        # it and run it.
         err.set_file_name(self.FILE_NAME)
         err.set_note(self.USAGE_NOTE)
         err.set_example(self.USAGE_EXAMPLE)
@@ -29,16 +26,18 @@ class Automator:
         num_args = len(self.arg_list)
         err.assert_abort(num_args >= 2, f"ERROR: minimum # of args is 2, got '{num_args}'", True)
 
-        if self.arg_list[0] == "-tool":
+        first_arg = 0
+        first_value = 1
+        if self.arg_list[first_arg] == "-tool":
             # Check next arg and see if it is a value or another arg name
-            if self.arg_list[1][0] != '-':  # A '-' would indicate another argument name, not a value
-                name = self.arg_list[1]
+            if self.arg_list[first_value][0] != '-':  # A '-' would indicate another argument name, not a value
+                name = self.arg_list[first_value]
                 # Remove the tool flag and value from the arg_list (tool creation won't need it)
                 self.arg_list.pop(0)
                 self.arg_list.pop(0)  # 0 again because you just popped the previous 0 item.
                 return name
             else:
-                err.error_abort(f"ERROR: Tool name has '-' in it '{self.arg_list[1]}'", True)
+                err.error_abort(f"ERROR: Tool name has '-' in it '{self.arg_list[first_value]}'", True)
         else:
             err.error_abort(f"ERROR: Incorrect syntax: '{err.get_script_call_string()}'", True)
 
@@ -58,8 +57,15 @@ class Automator:
         # Check that the requested tool (tool_name) is in the Tools directory (tool_list).
         # Load the tool's module, get its class (same name as tool name), instantiate the class, and run it.
         if self.tool_name in self.tool_list:
-            module = importlib.import_module(f"Tools.{self.tool_name}")
-            tool_class = getattr(module, self.tool_name)
+            try:
+                module = importlib.import_module(f"Tools.{self.tool_name}")
+            except (NameError, SyntaxError) as ex:
+                err.error_abort(f"ERROR: Failed trying to load module '{self.tool_name}'.\n{ex}")
+            try:
+                tool_class = getattr(module, self.tool_name)
+            except AttributeError as ex:
+                err.error_abort(f"ERROR: Failed attempting to extract class '{self.tool_name}' from module.\n{ex}")
+
             tool_object = tool_class(f"{self.FILE_NAME} -tool {self.tool_name} {' '.join(self.arg_list)}",
                                      self.arg_list)
             tool_object.run()
