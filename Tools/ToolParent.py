@@ -1,37 +1,40 @@
-import os
+from abc import ABC, abstractmethod
 from ErrorHandling import ErrorHandler as err
 
 
-class Parser:
+class ToolParent(ABC):
     def __init__(self, arg_list):
         self.arg_pairs = {}
         self.arg_names = []
-        script_name = os.path.basename(arg_list.pop(0))
-        arg_string = " "
-        arg_string = arg_string.join(arg_list)
 
-        index = 0  # Already popped the script name from position 0 in the list
+        index = 0
         num_args = len(arg_list)
         try:
             while index < num_args:
                 # Format of arg list should be [-<arg_name> [<arg_value>] .. -<arg_name> [<arg_value>]]
-                # Every arg name must start with '-'.  Arg values cannot start with '-'.  Arg values must follow an
-                # arg name.
+                # Every arg name must start with '-'.  Arg values are optional.  Arg values cannot start with '-'.
+                # Arg values must follow an arg name.
                 # NOTE:  All arg names and arg values will be stored as lower case to make them case independent
                 if arg_list[index][0] == "-":
-                    self.arg_names.append(arg_list[index][1:].lower())  # Strip the '-' from the arg name
-                    if index+1 < num_args and arg_list[index+1][0] != "-":
-                        # Capture arg name and arg value (arg values do not start with '-')
-                        self.arg_pairs[arg_list[index][1:].lower()] = arg_list[index+1].lower()
+                    arg_name_without_dash = arg_list[index][1:].lower()  # [1:] notation means char 1 forward (0 based)
+                    # All arg names are stored in arg_names list
+                    self.arg_names.append(arg_name_without_dash)
+
+                    # If there are more args, do a quick look ahead to see if next item is another arg name (will start
+                    # with '-') or if it's an arg value (no '-').  Store arg value and arg name in arg_pairs.
+                    next_arg_index = index + 1
+                    if next_arg_index < num_args and arg_list[next_arg_index][0] != "-":
+                        self.arg_pairs[arg_name_without_dash] = arg_list[next_arg_index].lower()
                         index += 1  # Skip the arg value in the iteration of arg names and arg values
-                    index += 1
+                    index += 1  # Move to the next arg name
                 else:
                     # Reaching this condition means either the list started with an arg value or the list
                     # had two arg values in a row.  Both conditions are incorrect.
-                    err.error_abort(f"ERROR: Arg value #{index+1} '{arg_list[index]}' not preceded by arg name.",
+                    # index + 3 is used because 0 = script name, 1 = '-tool', 2 = tool name.
+                    err.error_abort(f"ERROR: Arg value #{index+3} '{arg_list[index]}' not preceded by arg name.",
                                     True)
         except IndexError:
-            err.error_abort(f"ERROR: Incorrect argument list.\n{script_name} {arg_string}", True)
+            err.error_abort(f"ERROR: Incorrect argument list.\n{err.get_call_script_string()}", True)
 
     def get_value(self, arg_name):
         # Although caller should use lower case, go ahead and force it lower to be case independent
@@ -39,9 +42,10 @@ class Parser:
         if lower_name in self.arg_pairs:
             return self.arg_pairs[lower_name]
         else:
-            return ""
+            raise Exception(f"ERROR: '{arg_name}' does not have a value pair")
 
-    def check(self, name_list, value_name_list, optional_name_list, optional_value_list):
+    @abstractmethod
+    def validate_arguments(self, name_list, value_name_list, optional_name_list, optional_value_list):
         # Make all names lower case (do not change values)
         for local_list in (name_list, value_name_list, optional_name_list, optional_value_list):
             index = 0
@@ -68,3 +72,20 @@ class Parser:
 
     def optional_arg_set(self, optional_arg):
         return optional_arg.lower() in self.arg_names
+
+    @staticmethod
+    def set_err_usage(class_name, required_arg_names, required_arg_values, optional_arg_names, optional_arg_values):
+        usage_msg = f"-tool {class_name} "
+        for arg in required_arg_names:
+            if arg in required_arg_values:
+                usage_msg += f"-{arg} <value> "
+            else:
+                usage_msg += f"-{arg} "
+
+        for optional_arg in optional_arg_names:
+            if optional_arg in optional_arg_values:
+                usage_msg += f"[-{optional_arg} <value>] "
+            else:
+                usage_msg += f"[-{optional_arg}] "
+
+        err.set_usage_message(usage_msg.rstrip())
