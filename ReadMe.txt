@@ -2,22 +2,15 @@ Modularized automation framework.  Can be used to setup and run any number of to
 Has built in code for parsing arguments, error handling, and a simple interface for adding new tools as described
 below.
 
-Steps for adding an additional tool via a python module.  All examples are using the "CheckMissingFiles.py" example.
-1. Copy the "SampleTool.py" file and rename it to your tool name "CheckMissingFiles.py"
-2. Open your CheckMissingFiles.py file and rename the class from SampleTool to CheckMissingFiles
-3. Update the class variables to include the required arg names, values, optional args, and optional args with values.
-4. Change the __init__ constructor to load your arguments based on what's required, optional, etc.
-5. Change the run() function to perform whatever logic you want to achieve.
+Steps for adding an additional tool via a python module.  All examples are using a "YourTool.py" example.
+1. Copy the "SampleTool.py" file in the "Tools" dir and rename it to your tool name "YourTool.py"
+2. Open the "YourTool.py" file and rename the class from SampleTool to YourTool
+3. Update the class variables under the first "TODO" section to include any required arg names, values, optional args, and optional args with values.  NOTE:  Be sure to remove the SampleTool arg names and values.
+4. In the second "TODO" section, change the __init__ constructor to load your arguments based on what's required, optional, etc
+5. Change the validate_arguments() method to do any additional validation on your arguments.  The base class method will validate required arguments are there, arg names match your list from #3 above.  If you need to check for constraints on values for arguments or the right combination of optional args, you would do it in this method.
+6. Change the run() function to perform whatever logic you want to achieve.
 6. If you need to do any asserts or other error logic or messaging, please use the "ErrorHandling.py" module.  There
    are multiple examples throughout the "Automator.py" file.
-7. Open the "Automator.py" file and search for each instance of "ADDTOOL" comments.  
-   7.1. Follow the instructions to add your usage
-        examples (note:  Usage examples should be appended to the USAGE variable, not replace existing ones -- this
-        allows for multiple tools to extend the Automator object to have any number of optional functional tools).
-   7.2. And an "elif self.tool_name == "checkmissingfiles":" statement along with the expressions to import your module, 
-        create your object passing in the arg_parser and then run() the object.
-8. Update the unit test file by first adding any new text you added to the Automator.USAGE string to the BASE_USAGE
-   string.
-9. Run the unit tests (should pass once you've updated the BASE_USAGE string).  Fix if needed.
-10. At the bottom of the "UnitTest.py" file be sure to add your own unit tests.  Follow the example of the Sample tool
+7. At the bottom of the "UnitTest.py" file be sure to add your own unit tests.  Follow the example of the SampleTool
     as needed.
+8. Run the unit tests (should pass once you've updated the BASE_USAGE string).  Fix if needed.
